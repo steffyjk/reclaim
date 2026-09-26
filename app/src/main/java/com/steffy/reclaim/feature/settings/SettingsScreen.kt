@@ -26,6 +26,7 @@ import com.steffy.reclaim.profile.UserProfile
 @Composable
 fun SettingsScreen(
     profile: UserProfile,
+    isLoading: Boolean,
     onEditProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -46,6 +47,7 @@ fun SettingsScreen(
             SectionHeading(titleRes = R.string.profile_goals_title)
             Card(
                 onClick = onEditProfile,
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -91,6 +93,13 @@ fun SettingsScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
+            }
+            if (isLoading) {
+                Text(
+                    text = stringResource(R.string.profile_loading),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

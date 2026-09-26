@@ -70,6 +70,8 @@ fun ReclaimNavGraph(
                     ProfileGoalsScreen(
                         draft = draft,
                         validationIssues = profileUiState.validationIssues,
+                        isSaving = profileUiState.isSaving,
+                        persistenceError = profileUiState.persistenceError,
                         onDraftChange = onDraftChange,
                         onSave = onSaveProfile,
                         onCancel = onCancelProfile,
@@ -80,6 +82,7 @@ fun ReclaimNavGraph(
                 Screen.Habits.name -> HabitsScreen()
                 Screen.Settings.name -> SettingsScreen(
                     profile = profileUiState.profile,
+                    isLoading = profileUiState.isLoading,
                     onEditProfile = onEditProfile,
                 )
                 else -> HomeScreen(profileUiState)

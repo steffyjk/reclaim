@@ -68,7 +68,10 @@
     <string name="goal_date_format">Goal date (YYYY-MM-DD)</string>
     <string name="goal_date_hint">Enter a real calendar date, for example 2027-06-30.</string>
     <string name="plan_selection">PLAN</string>
-    <string name="profile_memory_note">Changes are held in memory for this app session only.</string>
+    <string name="profile_memory_note">Saved on this device only. No account or cloud sync.</string>
+    <string name="profile_loading">Loading saved profile…</string>
+    <string name="profile_saving">Saving…</string>
+    <string name="profile_save_error">Could not access local storage. Your edits are still here; please try again.</string>
     <string name="save_changes">Save changes</string>
     <string name="cancel">Cancel</string>
     <string name="validation_required">Please enter a name.</string>

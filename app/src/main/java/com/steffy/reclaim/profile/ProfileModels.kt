@@ -86,6 +86,9 @@ data class ProfileUiState(
     val metrics: ProfileMetrics,
     val draft: ProfileDraft? = null,
     val validationIssues: Map<ProfileField, ValidationIssue> = emptyMap(),
+    val isLoading: Boolean = false,
+    val isSaving: Boolean = false,
+    val persistenceError: Boolean = false,
 )
 
 object ProfileDates {

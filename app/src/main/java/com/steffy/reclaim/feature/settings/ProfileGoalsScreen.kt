@@ -38,6 +38,8 @@ import com.steffy.reclaim.core.ui.SectionHeading
 fun ProfileGoalsScreen(
     draft: ProfileDraft,
     validationIssues: Map<ProfileField, ValidationIssue>,
+    isSaving: Boolean,
+    persistenceError: Boolean,
     onDraftChange: (ProfileDraft) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
@@ -143,15 +145,23 @@ fun ProfileGoalsScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        if (persistenceError) {
+            Text(
+                text = stringResource(R.string.profile_save_error),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
         Button(
             onClick = onSave,
+            enabled = !isSaving,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 2.dp),
             shape = RoundedCornerShape(14.dp),
         ) {
             Text(
-                text = stringResource(R.string.save_changes),
+                text = stringResource(if (isSaving) R.string.profile_saving else R.string.save_changes),
                 modifier = Modifier.padding(vertical = 4.dp),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,

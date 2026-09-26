@@ -14,13 +14,18 @@ import androidx.compose.runtime.setValue
 import com.steffy.reclaim.navigation.ReclaimNavGraph
 import com.steffy.reclaim.navigation.Screen
 import com.steffy.reclaim.profile.ProfileViewModel
+import com.steffy.reclaim.profile.ProfileViewModelFactory
 import com.steffy.reclaim.ui.theme.ReclaimTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val profileViewModel = ViewModelProvider(this)[ProfileViewModel::class.java]
+        val reclaimApplication = application as ReclaimApplication
+        val profileViewModel = ViewModelProvider(
+            this,
+            ProfileViewModelFactory(reclaimApplication.profileRepository),
+        )[ProfileViewModel::class.java]
         setContent {
             ReclaimTheme {
                 var selectedScreen by rememberSaveable { mutableStateOf(Screen.Home) }
