@@ -139,7 +139,7 @@ object ProfileCalculations {
             0f
         }
         return ProfileMetrics(
-            remainingWeightKg = profile.currentWeightKg - profile.goalWeightKg,
+            remainingWeightKg = (profile.currentWeightKg - profile.goalWeightKg).coerceAtLeast(0.0),
             progressFraction = progress,
             progressPercent = (progress * 100f).roundToInt(),
             daysRemaining = ProfileDates.parseEpochDay(profile.goalDate)

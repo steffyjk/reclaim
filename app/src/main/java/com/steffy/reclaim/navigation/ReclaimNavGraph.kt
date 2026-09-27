@@ -17,10 +17,12 @@ import androidx.compose.ui.res.stringResource
 import com.steffy.reclaim.feature.habits.HabitsScreen
 import com.steffy.reclaim.feature.home.HomeScreen
 import com.steffy.reclaim.feature.progress.ProgressScreen
+import com.steffy.reclaim.feature.progress.WeightTrackingScreen
 import com.steffy.reclaim.feature.settings.ProfileGoalsScreen
 import com.steffy.reclaim.feature.settings.SettingsScreen
 import com.steffy.reclaim.profile.ProfileDraft
 import com.steffy.reclaim.profile.ProfileUiState
+import com.steffy.reclaim.weight.WeightTrackingUiState
 
 @Composable
 fun ReclaimNavGraph(
@@ -31,12 +33,20 @@ fun ReclaimNavGraph(
     onDraftChange: (ProfileDraft) -> Unit,
     onSaveProfile: () -> Unit,
     onCancelProfile: () -> Unit,
+    isWeightTracking: Boolean,
+    onOpenWeightTracking: () -> Unit,
+    onCloseWeightTracking: () -> Unit,
+    weightUiState: WeightTrackingUiState,
+    onWeightInputChange: (String) -> Unit,
+    onSaveWeight: () -> Unit,
+    onEditWeightEntry: (String) -> Unit,
+    onReturnToTodayWeight: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val contentDestination = if (selectedScreen == Screen.Settings && profileUiState.draft != null) {
-        "profile_editor"
-    } else {
-        selectedScreen.name
+    val contentDestination = when {
+        selectedScreen == Screen.Settings && profileUiState.draft != null -> "profile_editor"
+        selectedScreen == Screen.Progress && isWeightTracking -> "weight_tracking"
+        else -> selectedScreen.name
     }
     Scaffold(
         modifier = modifier,
@@ -78,7 +88,18 @@ fun ReclaimNavGraph(
                     )
                 }
                 Screen.Home.name -> HomeScreen(profileUiState)
-                Screen.Progress.name -> ProgressScreen(profileUiState)
+                Screen.Progress.name -> ProgressScreen(
+                    weightUiState = weightUiState,
+                    onOpenWeightTracking = onOpenWeightTracking,
+                )
+                "weight_tracking" -> WeightTrackingScreen(
+                    state = weightUiState,
+                    onInputChange = onWeightInputChange,
+                    onSave = onSaveWeight,
+                    onEditEntry = onEditWeightEntry,
+                    onReturnToToday = onReturnToTodayWeight,
+                    onBack = onCloseWeightTracking,
+                )
                 Screen.Habits.name -> HabitsScreen()
                 Screen.Settings.name -> SettingsScreen(
                     profile = profileUiState.profile,

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -25,11 +26,13 @@ import androidx.compose.ui.unit.dp
 import com.steffy.reclaim.R
 import com.steffy.reclaim.core.ui.MetricCard
 import com.steffy.reclaim.core.ui.SectionHeading
-import com.steffy.reclaim.profile.ProfileUiState
+import com.steffy.reclaim.weight.WeightChartPoint
+import com.steffy.reclaim.weight.WeightTrackingUiState
 
 @Composable
 fun ProgressScreen(
-    profileUiState: ProfileUiState,
+    weightUiState: WeightTrackingUiState,
+    onOpenWeightTracking: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -47,27 +50,38 @@ fun ProgressScreen(
         )
         MetricCard(
             titleRes = R.string.current,
-            value = stringResource(R.string.weight_value_kg, profileUiState.profile.currentWeightKg),
+            value = stringResource(R.string.weight_value_kg, weightUiState.summary.currentWeightKg),
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             MetricCard(
                 titleRes = R.string.goal,
-                value = stringResource(R.string.weight_value_kg, profileUiState.profile.goalWeightKg),
+                value = stringResource(R.string.weight_value_kg, weightUiState.summary.goalWeightKg),
                 modifier = Modifier.weight(1f),
             )
             MetricCard(
                 titleRes = R.string.remaining,
-                value = stringResource(R.string.weight_value_kg, profileUiState.metrics.remainingWeightKg),
+                value = stringResource(R.string.weight_value_kg, weightUiState.summary.remainingWeightKg),
                 modifier = Modifier.weight(1f),
             )
         }
+        MetricCard(
+            titleRes = R.string.weight_change_from_start,
+            value = stringResource(R.string.weight_value_kg, weightUiState.summary.totalChangeKg),
+            modifier = Modifier.fillMaxWidth(),
+        )
         Text(
-            text = stringResource(R.string.progress_percent_format, profileUiState.metrics.progressPercent),
+            text = stringResource(R.string.progress_percent_format, weightUiState.summary.progressPercent),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.SemiBold,
         )
+        Button(
+            onClick = onOpenWeightTracking,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.open_weight_tracking))
+        }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionHeading(titleRes = R.string.weight_trend)
             Card(
@@ -81,20 +95,31 @@ fun ProgressScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.trend_subtitle),
+                        text = stringResource(
+                            if (weightUiState.chartPoints.size >= 2) {
+                                R.string.weight_chart_logged_entries
+                            } else {
+                                R.string.weight_chart_limited_data
+                            },
+                            weightUiState.history.size,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    TrendPlaceholder(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(190.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.trend_disclaimer),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    if (weightUiState.chartPoints.size >= 2) {
+                        WeightTrendChart(
+                            points = weightUiState.chartPoints,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(190.dp),
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.weight_chart_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         }
@@ -102,7 +127,10 @@ fun ProgressScreen(
 }
 
 @Composable
-private fun TrendPlaceholder(modifier: Modifier = Modifier) {
+private fun WeightTrendChart(
+    points: List<WeightChartPoint>,
+    modifier: Modifier = Modifier,
+) {
     val lineColor = MaterialTheme.colorScheme.primary
     val gridColor = MaterialTheme.colorScheme.outlineVariant
     Canvas(modifier = modifier) {
@@ -116,28 +144,22 @@ private fun TrendPlaceholder(modifier: Modifier = Modifier) {
                 strokeWidth = 1.dp.toPx(),
             )
         }
-        val points = listOf(
-            0.06f to 0.25f,
-            0.20f to 0.35f,
-            0.34f to 0.30f,
-            0.49f to 0.48f,
-            0.63f to 0.42f,
-            0.78f to 0.62f,
-            0.94f to 0.72f,
-        )
         val path = Path().apply {
-            points.forEachIndexed { index, (x, y) ->
-                val px = size.width * x
-                val py = size.height * y
+            points.forEachIndexed { index, point ->
+                val px = size.width * point.xFraction
+                val py = size.height * point.yFraction
                 if (index == 0) moveTo(px, py) else lineTo(px, py)
             }
         }
         drawPath(path, lineColor, style = Stroke(width = 4.dp.toPx()))
-        points.forEach { (x, y) ->
+        points.forEach { point ->
             drawCircle(
                 color = lineColor,
                 radius = 4.dp.toPx(),
-                center = androidx.compose.ui.geometry.Offset(size.width * x, size.height * y),
+                center = androidx.compose.ui.geometry.Offset(
+                    size.width * point.xFraction,
+                    size.height * point.yFraction,
+                ),
             )
         }
     }
